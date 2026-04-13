@@ -14,6 +14,15 @@ class UserRepository {
       totalActivities: 23,
       totalTime: const Duration(hours: 18, minutes: 45),
     ),
+    UserModel(
+      id: '2',
+      name: 'Fabio',
+      email: 'fabio@gmail.com',
+      password: '123456',
+      totalDistance: 55.9,
+      totalActivities: 16,
+      totalTime: const Duration(hours: 14, minutes: 15),
+    ),
   ];
 
   // Busca usuário por email e senha para login

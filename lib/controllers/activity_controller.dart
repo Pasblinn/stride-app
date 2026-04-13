@@ -63,7 +63,7 @@ class ActivityController extends ChangeNotifier {
       loadActivities(activity.userId);
       return true;
     }
-    _errorMessage = 'Erro ao atualizar atividade';
+    _errorMessage = 'Erro ao atualizar atividade.';
     notifyListeners();
     return false;
   }
@@ -75,7 +75,7 @@ class ActivityController extends ChangeNotifier {
       loadActivities(userId);
       return true;
     }
-    _errorMessage = 'Erro ao remover atividade';
+    _errorMessage = 'Erro ao remover atividade.';
     notifyListeners();
     return false;
   }

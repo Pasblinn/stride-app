@@ -47,7 +47,7 @@ class ActivityDetailPage extends StatelessWidget {
             // Cabeçalho com ícone e título
             Row(
               children: [
-                Text(activity.type.icon, style: const TextStyle(fontSize: 40)),
+                Text(activity.type.icon, style: const TextStyle(fontSize: 41)),
                 const SizedBox(width: 16),
                 Expanded(
                   child: Column(

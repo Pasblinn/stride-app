@@ -26,7 +26,7 @@ class StatsPage extends StatelessWidget {
                   Icon(Icons.bar_chart, size: 64, color: Colors.grey),
                   SizedBox(height: 16),
                   Text(
-                    'Sem dados para exibir',
+                    'Sem dados para exibir.',
                     style: TextStyle(color: Colors.grey, fontSize: 16),
                   ),
                 ],
@@ -45,7 +45,7 @@ class StatsPage extends StatelessWidget {
               children: [
                 // Card de resumo geral
                 const Text(
-                  'Resumo Geral',
+                  'Resumo Geral.',
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 12),
@@ -96,7 +96,7 @@ class StatsPage extends StatelessWidget {
 
                 // Estatísticas por tipo de atividade
                 const Text(
-                  'Por Tipo de Atividade',
+                  'Por Tipo de Atividade.',
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 12),

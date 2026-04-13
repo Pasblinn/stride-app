@@ -62,6 +62,18 @@ class ActivityRepository {
       averagePace: 5.33,
       calories: 490,
     ),
+    ActivityModel(
+      id: '6',
+      userId: '1',
+      title: 'Corrida de tiro',
+      description: 'Treino de tiros na pista',
+      type: ActivityType.running,
+      distance: 6.0,
+      duration: const Duration(minutes: 32),
+      date: DateTime.now().subtract(const Duration(days: 2)),
+      averagePace: 4.22,
+      calories: 850,
+    ),
   ];
 
   int _nextId = 6;
