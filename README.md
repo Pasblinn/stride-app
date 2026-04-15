@@ -167,5 +167,4 @@ Ou cadastre-se como um novo usuário pela tela de cadastro.
 
 - **Disciplina:** Dispositivos Móveis
 - **Instituição:** Universidade Tecnológica Federal do Paraná (UTFPR)
-- **Versão:** 1.0.0 (Parte 1 - interface e estrutura)
-- **Próxima etapa (Parte 2):** Integração com banco de dados local
+
