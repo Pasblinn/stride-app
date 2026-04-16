@@ -41,10 +41,6 @@ class ActivityFeedPage extends StatelessWidget {
           Consumer<ActivityController>(
             builder: (context, controller, _) {
               final weekActivities = controller.weekActivities;
-              final weekDistance = weekActivities.fold<double>(
-                0.0,
-                (sum, a) => sum + a.distance,
-              );
               return Container(
                 margin: const EdgeInsets.symmetric(horizontal: 16),
                 padding: const EdgeInsets.all(16),
@@ -59,18 +55,18 @@ class ActivityFeedPage extends StatelessWidget {
                   children: [
                     _buildWeekStat(
                       'Atividades',
-                      '${weekActivities.length}',
+                      '${controller.totalActivities}',
                       Icons.fitness_center,
                     ),
                     _buildWeekStat(
                       'Distância',
-                      '${weekDistance.toStringAsFixed(1)} km',
+                      '${controller.totalDistance.toStringAsFixed(1)} km',
                       Icons.straighten,
                     ),
                     _buildWeekStat(
-                      'Total',
-                      '${controller.totalActivities}',
-                      Icons.emoji_events,
+                      'Esta Semana',
+                      '${weekActivities.length}',
+                      Icons.calendar_today,
                     ),
                   ],
                 ),
