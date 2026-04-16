@@ -221,11 +221,13 @@ class ProfilePage extends StatelessWidget {
             child: const Text('Cancelar'),
           ),
           TextButton(
-            onPressed: () {
-              Provider.of<AuthController>(context, listen: false).logout();
-              Navigator.pop(ctx);
-              Navigator.pushReplacement(
-                context,
+            onPressed: () async {
+              final navigator = Navigator.of(context);
+              final dialogNavigator = Navigator.of(ctx);
+              final authController = Provider.of<AuthController>(context, listen: false);
+              await authController.logout();
+              dialogNavigator.pop();
+              navigator.pushReplacement(
                 MaterialPageRoute(builder: (_) => const LoginPage()),
               );
             },

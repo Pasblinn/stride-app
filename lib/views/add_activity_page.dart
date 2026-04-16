@@ -107,7 +107,7 @@ class _AddActivityPageState extends State<AddActivityPage> {
             children: [
               // Seletor de tipo de atividade com DropdownButtonFormField
               DropdownButtonFormField<ActivityType>(
-                value: _selectedType,
+                initialValue: _selectedType,
                 decoration: const InputDecoration(
                   labelText: 'Tipo de atividade',
                   prefixIcon: Icon(Icons.category),

@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../models/user_model.dart';
 import '../repositories/user_repository.dart';
 
 // Controller responsável pela autenticação (login e cadastro)
 // Utiliza ChangeNotifier para notificar a UI sobre mudanças de estado
+// Persiste a sessão com SharedPreferences para manter o login ao reabrir o app
 class AuthController extends ChangeNotifier {
   final UserRepository _userRepository = UserRepository();
 
@@ -17,8 +19,27 @@ class AuthController extends ChangeNotifier {
   String? get errorMessage => _errorMessage;
   bool get isAuthenticated => _currentUser != null;
 
+  // Verifica se existe uma sessão salva ao iniciar o app
+  Future<bool> tryAutoLogin() async {
+    final prefs = await SharedPreferences.getInstance();
+    final savedUserId = prefs.getString('logged_user_id');
+
+    if (savedUserId == null) return false;
+
+    final user = _userRepository.getUserById(savedUserId);
+    if (user != null) {
+      _currentUser = user;
+      notifyListeners();
+      return true;
+    }
+
+    // Sessão inválida, limpa o cache
+    await prefs.remove('logged_user_id');
+    return false;
+  }
+
   // Realiza o login verificando email e senha no repositório
-  bool login(String email, String password) {
+  Future<bool> login(String email, String password) async {
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
@@ -28,6 +49,11 @@ class AuthController extends ChangeNotifier {
     if (user != null) {
       _currentUser = user;
       _isLoading = false;
+
+      // Salva a sessão no cache
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('logged_user_id', user.id);
+
       notifyListeners();
       return true;
     } else {
@@ -39,7 +65,7 @@ class AuthController extends ChangeNotifier {
   }
 
   // Realiza o cadastro de um novo usuário com validações
-  bool register(String name, String email, String password) {
+  Future<bool> register(String name, String email, String password) async {
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
@@ -60,14 +86,24 @@ class AuthController extends ChangeNotifier {
 
     _currentUser = _userRepository.addUser(newUser);
     _isLoading = false;
+
+    // Salva a sessão no cache
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('logged_user_id', _currentUser!.id);
+
     notifyListeners();
     return true;
   }
 
-  // Realiza o logout limpando o usuário atual
-  void logout() {
+  // Realiza o logout limpando o usuário atual e o cache
+  Future<void> logout() async {
     _currentUser = null;
     _errorMessage = null;
+
+    // Remove a sessão do cache
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('logged_user_id');
+
     notifyListeners();
   }
 

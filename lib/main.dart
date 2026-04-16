@@ -4,8 +4,10 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'controllers/auth_controller.dart';
 import 'controllers/activity_controller.dart';
 import 'views/login_page.dart';
+import 'views/home_page.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(const StrideApp());
 }
 
@@ -52,7 +54,72 @@ class StrideApp extends StatelessWidget {
                 const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           ),
         ),
-        home: const LoginPage(),
+        // SplashPage verifica se há sessão salva antes de decidir a tela inicial
+        home: const SplashPage(),
+      ),
+    );
+  }
+}
+
+// Tela de carregamento inicial que verifica a sessão salva
+class SplashPage extends StatefulWidget {
+  const SplashPage({super.key});
+
+  @override
+  State<SplashPage> createState() => _SplashPageState();
+}
+
+class _SplashPageState extends State<SplashPage> {
+  @override
+  void initState() {
+    super.initState();
+    _checkSession();
+  }
+
+  Future<void> _checkSession() async {
+    final authController =
+        Provider.of<AuthController>(context, listen: false);
+    final isLoggedIn = await authController.tryAutoLogin();
+
+    if (!mounted) return;
+
+    if (isLoggedIn) {
+      // Sessão encontrada, vai direto para a Home
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const HomePage()),
+      );
+    } else {
+      // Sem sessão, vai para o Login
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const LoginPage()),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // Tela de loading enquanto verifica a sessão
+    return const Scaffold(
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.directions_run, size: 80, color: Colors.deepOrange),
+            SizedBox(height: 16),
+            Text(
+              'Stride',
+              style: TextStyle(
+                fontSize: 32,
+                fontWeight: FontWeight.bold,
+                color: Colors.deepOrange,
+              ),
+            ),
+            SizedBox(height: 24),
+            CircularProgressIndicator(color: Colors.deepOrange),
+          ],
+        ),
       ),
     );
   }

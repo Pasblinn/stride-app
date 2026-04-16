@@ -29,16 +29,18 @@ class _RegisterPageState extends State<RegisterPage> {
     super.dispose();
   }
 
-  void _handleRegister() {
+  Future<void> _handleRegister() async {
     if (_formKey.currentState!.validate()) {
       final authController =
           Provider.of<AuthController>(context, listen: false);
 
-      final success = authController.register(
+      final success = await authController.register(
         _nameController.text.trim(),
         _emailController.text.trim(),
         _passwordController.text,
       );
+
+      if (!mounted) return;
 
       if (success) {
         Navigator.pushReplacement(

@@ -99,10 +99,20 @@ class _EditActivityPageState extends State<EditActivityPage> {
             : null,
       );
 
+      // Valida que a duração total é maior que zero
+      if (hours == 0 && minutes == 0 && seconds == 0) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('A duração deve ser maior que zero'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
+
       final success = controller.updateActivity(updatedActivity);
 
       if (success) {
-        Navigator.pop(context);
         Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -130,7 +140,7 @@ class _EditActivityPageState extends State<EditActivityPage> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               DropdownButtonFormField<ActivityType>(
-                value: _selectedType,
+                initialValue: _selectedType,
                 decoration: const InputDecoration(
                   labelText: 'Tipo de atividade',
                   prefixIcon: Icon(Icons.category),
@@ -222,6 +232,16 @@ class _EditActivityPageState extends State<EditActivityPage> {
                         labelText: 'Horas',
                         border: OutlineInputBorder(),
                       ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Obrigatório';
+                        }
+                        final h = int.tryParse(value);
+                        if (h == null || h < 0 || h > 23) {
+                          return 'Inválido';
+                        }
+                        return null;
+                      },
                     ),
                   ),
                   const SizedBox(width: 8),
@@ -254,6 +274,16 @@ class _EditActivityPageState extends State<EditActivityPage> {
                         labelText: 'Segundos',
                         border: OutlineInputBorder(),
                       ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Obrigatório';
+                        }
+                        final s = int.tryParse(value);
+                        if (s == null || s < 0 || s > 59) {
+                          return 'Inválido';
+                        }
+                        return null;
+                      },
                     ),
                   ),
                 ],

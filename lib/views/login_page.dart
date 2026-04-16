@@ -30,16 +30,18 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   // Método chamado ao pressionar o botão de login
-  void _handleLogin() {
+  Future<void> _handleLogin() async {
     // Valida todos os campos do formulário
     if (_formKey.currentState!.validate()) {
       final authController =
           Provider.of<AuthController>(context, listen: false);
 
-      final success = authController.login(
+      final success = await authController.login(
         _emailController.text.trim(),
         _passwordController.text,
       );
+
+      if (!mounted) return;
 
       if (success) {
         // Navega para a HomePage e remove a tela de login da pilha
