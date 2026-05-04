@@ -21,8 +21,17 @@ class UserRepository implements IUserRepository {
     }
   }
 
+  async findByEmail(email: string): Promise<IUser | null> {
+    try {
+      return await this.repository.findOne({ where: { email } })
+    } catch (error) {
+      throw new AppError('Failed to fetch user', 500)
+    }
+  }
+
   async create(data: CreateUserData): Promise<IUser> {
     try {
+      console.log(data)
       const user = this.repository.create(data)
       return await this.repository.save(user)
     } catch (error) {
