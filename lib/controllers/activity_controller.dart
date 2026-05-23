@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import '../models/activity_model.dart';
 import '../repositories/activity_repository.dart';
 
-// Controller responsável por gerenciar as atividades do usuário
-// Utiliza ChangeNotifier para notificar a UI sobre mudanças
 class ActivityController extends ChangeNotifier {
   final ActivityRepository _activityRepository = ActivityRepository();
 
@@ -11,103 +9,128 @@ class ActivityController extends ChangeNotifier {
   bool _isLoading = false;
   String? _errorMessage;
 
-  // Getters para acessar o estado
   List<ActivityModel> get activities => _activities;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
 
-  // Carrega as atividades de um usuário específico
-  void loadActivities(String userId) {
+  Future<void> loadActivities({required String token}) async {
     _isLoading = true;
+    _errorMessage = null;
     notifyListeners();
 
-    _activities = _activityRepository.getActivitiesByUserId(userId);
-    _isLoading = false;
-    notifyListeners();
+    try {
+      _activities = await _activityRepository.list(token: token);
+    } catch (e) {
+      _errorMessage = e.toString().replaceFirst('Exception: ', '');
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
   }
 
-  // Adiciona uma nova atividade e recarrega a lista
-  bool addActivity({
-    required String userId,
+  Future<bool> addActivity({
+    required String token,
     required String title,
     String? description,
     required ActivityType type,
     required double distance,
     required Duration duration,
     required DateTime date,
+    double? averagePace,
     double? calories,
-  }) {
+  }) async {
     _errorMessage = null;
 
-    final activity = ActivityModel(
-      id: '',
-      userId: userId,
-      title: title,
-      description: description,
-      type: type,
-      distance: distance,
-      duration: duration,
-      date: date,
-      calories: calories,
-    );
+    try {
+      final activity = await _activityRepository.create(
+        token: token,
+        title: title,
+        description: description,
+        type: type,
+        distance: distance,
+        duration: duration,
+        date: date,
+        averagePace: averagePace,
+        calories: calories,
+      );
 
-    _activityRepository.addActivity(activity);
-    loadActivities(userId);
-    return true;
-  }
-
-  // Atualiza uma atividade existente
-  bool updateActivity(ActivityModel activity) {
-    final result = _activityRepository.updateActivity(activity);
-    if (result != null) {
-      loadActivities(activity.userId);
+      _activities.insert(0, activity);
+      notifyListeners();
       return true;
+    } catch (e) {
+      _errorMessage = e.toString().replaceFirst('Exception: ', '');
+      notifyListeners();
+      return false;
     }
-    _errorMessage = 'Erro ao atualizar atividade.';
-    notifyListeners();
-    return false;
   }
 
-  // Remove uma atividade e recarrega a lista
-  bool deleteActivity(String activityId, String userId) {
-    final success = _activityRepository.deleteActivity(activityId);
-    if (success) {
-      loadActivities(userId);
+  Future<bool> updateActivity({
+    required String token,
+    required ActivityModel activity,
+  }) async {
+    _errorMessage = null;
+
+    try {
+      final updated = await _activityRepository.update(
+        token: token,
+        id: activity.id,
+        title: activity.title,
+        description: activity.description,
+        type: activity.type,
+        distance: activity.distance,
+        duration: activity.duration,
+        date: activity.date,
+        averagePace: activity.averagePace,
+        calories: activity.calories,
+      );
+
+      final index = _activities.indexWhere((a) => a.id == activity.id);
+      if (index != -1) _activities[index] = updated;
+      notifyListeners();
       return true;
+    } catch (e) {
+      _errorMessage = e.toString().replaceFirst('Exception: ', '');
+      notifyListeners();
+      return false;
     }
-    _errorMessage = 'Erro ao remover atividade.';
-    notifyListeners();
-    return false;
   }
 
-  // Calcula a distância total das atividades carregadas
-  double get totalDistance {
-    return _activities.fold(0.0, (sum, a) => sum + a.distance);
+  Future<bool> deleteActivity({
+    required String token,
+    required String activityId,
+  }) async {
+    _errorMessage = null;
+
+    try {
+      await _activityRepository.delete(token: token, id: activityId);
+      _activities.removeWhere((a) => a.id == activityId);
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _errorMessage = e.toString().replaceFirst('Exception: ', '');
+      notifyListeners();
+      return false;
+    }
   }
 
-  // Calcula o tempo total das atividades carregadas
-  Duration get totalDuration {
-    return _activities.fold(Duration.zero, (sum, a) => sum + a.duration);
-  }
+  double get totalDistance =>
+      _activities.fold(0.0, (sum, a) => sum + a.distance);
 
-  // Retorna o total de atividades carregadas
+  Duration get totalDuration =>
+      _activities.fold(Duration.zero, (sum, a) => sum + a.duration);
+
   int get totalActivities => _activities.length;
 
-  // Retorna atividades filtradas por tipo
-  List<ActivityModel> getActivitiesByType(ActivityType type) {
-    return _activities.where((a) => a.type == type).toList();
-  }
+  List<ActivityModel> getActivitiesByType(ActivityType type) =>
+      _activities.where((a) => a.type == type).toList();
 
-  // Retorna as atividades da semana atual
   List<ActivityModel> get weekActivities {
     final now = DateTime.now();
-    final startOfWeek = now.subtract(Duration(days: now.weekday - 1));
-    final start =
-        DateTime(startOfWeek.year, startOfWeek.month, startOfWeek.day);
+    final start = DateTime(now.year, now.month, now.day)
+        .subtract(Duration(days: now.weekday - 1));
     return _activities.where((a) => a.date.isAfter(start)).toList();
   }
 
-  // Limpa a mensagem de erro
   void clearError() {
     _errorMessage = null;
     notifyListeners();

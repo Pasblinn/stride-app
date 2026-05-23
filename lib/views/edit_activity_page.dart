@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import '../controllers/activity_controller.dart';
+import '../controllers/auth_controller.dart';
 import '../models/activity_model.dart';
 
 // Tela de edição de uma atividade existente
@@ -73,14 +74,26 @@ class _EditActivityPageState extends State<EditActivityPage> {
     }
   }
 
-  void _handleUpdate() {
+  Future<void> _handleUpdate() async {
     if (_formKey.currentState!.validate()) {
+      final authController =
+          Provider.of<AuthController>(context, listen: false);
       final controller =
           Provider.of<ActivityController>(context, listen: false);
 
       final hours = int.tryParse(_hoursController.text) ?? 0;
       final minutes = int.tryParse(_minutesController.text) ?? 0;
       final seconds = int.tryParse(_secondsController.text) ?? 0;
+
+      if (hours == 0 && minutes == 0 && seconds == 0) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('A duração deve ser maior que zero'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
 
       final updatedActivity = widget.activity.copyWith(
         title: _titleController.text.trim(),
@@ -99,20 +112,12 @@ class _EditActivityPageState extends State<EditActivityPage> {
             : null,
       );
 
-      // Valida que a duração total é maior que zero
-      if (hours == 0 && minutes == 0 && seconds == 0) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('A duração deve ser maior que zero'),
-            backgroundColor: Colors.red,
-          ),
-        );
-        return;
-      }
+      final success = await controller.updateActivity(
+        token: authController.token!,
+        activity: updatedActivity,
+      );
 
-      final success = controller.updateActivity(updatedActivity);
-
-      if (success) {
+      if (success && mounted) {
         Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(

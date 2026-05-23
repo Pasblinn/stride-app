@@ -180,22 +180,25 @@ class ActivityDetailPage extends StatelessWidget {
             child: const Text('Cancelar'),
           ),
           TextButton(
-            onPressed: () {
+            onPressed: () async {
               final authController =
                   Provider.of<AuthController>(context, listen: false);
-              Provider.of<ActivityController>(context, listen: false)
+              final success = await Provider.of<ActivityController>(context, listen: false)
                   .deleteActivity(
-                activity.id,
-                authController.currentUser!.id,
+                token: authController.token!,
+                activityId: activity.id,
               );
+              if (!context.mounted) return;
               Navigator.pop(ctx);
               Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Atividade excluída com sucesso'),
-                  backgroundColor: Colors.green,
-                ),
-              );
+              if (success) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Atividade excluída com sucesso'),
+                    backgroundColor: Colors.green,
+                  ),
+                );
+              }
             },
             child: const Text('Excluir', style: TextStyle(color: Colors.red)),
           ),

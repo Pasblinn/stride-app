@@ -52,7 +52,7 @@ class _AddActivityPageState extends State<AddActivityPage> {
     }
   }
 
-  void _handleSubmit() {
+  Future<void> _handleSubmit() async {
     if (_formKey.currentState!.validate()) {
       final authController =
           Provider.of<AuthController>(context, listen: false);
@@ -63,8 +63,8 @@ class _AddActivityPageState extends State<AddActivityPage> {
       final minutes = int.tryParse(_minutesController.text) ?? 0;
       final seconds = int.tryParse(_secondsController.text) ?? 0;
 
-      final success = activityController.addActivity(
-        userId: authController.currentUser!.id,
+      final success = await activityController.addActivity(
+        token: authController.token!,
         title: _titleController.text.trim(),
         description: _descriptionController.text.trim().isNotEmpty
             ? _descriptionController.text.trim()
@@ -78,7 +78,7 @@ class _AddActivityPageState extends State<AddActivityPage> {
             : null,
       );
 
-      if (success) {
+      if (success && mounted) {
         Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(

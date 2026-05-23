@@ -20,6 +20,18 @@ class UserModel {
     this.totalTime = Duration.zero,
   });
 
+  factory UserModel.fromJson(Map<String, dynamic> json) {
+    return UserModel(
+      id: json['id'],
+      name: json['name'],
+      email: json['email'],
+      password: json['password'] ?? '',
+      profileImageUrl: json['profileImageUrl'],
+      totalDistance: (json['totalDistance'] ?? 0.0).toDouble(),
+      totalActivities: json['totalActivities'] ?? 0,
+    );
+  }
+
   // Cria uma cópia do modelo com campos alterados
   UserModel copyWith({
     String? id,

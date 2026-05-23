@@ -66,6 +66,32 @@ class ActivityModel {
     this.calories,
   });
 
+  factory ActivityModel.fromJson(Map<String, dynamic> json) {
+    return ActivityModel(
+      id: json['id'],
+      userId: json['userId'],
+      title: json['title'],
+      description: json['description'],
+      type: ActivityType.values.firstWhere((e) => e.name == json['type']),
+      distance: (json['distance'] as num).toDouble(),
+      duration: Duration(seconds: json['durationSeconds'] as int),
+      date: DateTime.parse(json['date']),
+      averagePace: json['averagePace'] != null ? (json['averagePace'] as num).toDouble() : null,
+      calories: json['calories'] != null ? (json['calories'] as num).toDouble() : null,
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+    'title': title,
+    'description': description,
+    'type': type.name,
+    'distance': distance,
+    'durationSeconds': duration.inSeconds,
+    'date': date.toIso8601String(),
+    'averagePace': averagePace,
+    'calories': calories,
+  };
+
   // Calcula o pace médio (min/km) a partir da distância e duração
   double get calculatedPace {
     if (distance <= 0) return 0;

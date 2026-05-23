@@ -33,9 +33,9 @@ class _HomePageState extends State<HomePage> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final authController =
           Provider.of<AuthController>(context, listen: false);
-      if (authController.currentUser != null) {
+      if (authController.token != null) {
         Provider.of<ActivityController>(context, listen: false)
-            .loadActivities(authController.currentUser!.id);
+            .loadActivities(token: authController.token!);
       }
     });
   }

@@ -1,128 +1,130 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/user_model.dart';
+import '../repositories/auth_repository.dart';
 import '../repositories/user_repository.dart';
 
-// Controller responsável pela autenticação (login e cadastro)
-// Utiliza ChangeNotifier para notificar a UI sobre mudanças de estado
-// Persiste a sessão com SharedPreferences para manter o login ao reabrir o app
 class AuthController extends ChangeNotifier {
   final UserRepository _userRepository = UserRepository();
+  final AuthRepository _authRepository = AuthRepository();
 
   UserModel? _currentUser;
+  String? _token;
+  String? _refreshToken;
   bool _isLoading = false;
   String? _errorMessage;
 
-  // Getters para acessar o estado atual
   UserModel? get currentUser => _currentUser;
+  String? get token => _token;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
-  bool get isAuthenticated => _currentUser != null;
+  bool get isAuthenticated => _currentUser != null && _token != null;
 
-  // Verifica se existe uma sessão salva ao iniciar o app
   Future<bool> tryAutoLogin() async {
     final prefs = await SharedPreferences.getInstance();
-    final savedUserId = prefs.getString('logged_user_id');
+    final savedToken = prefs.getString('token');
+    final savedRefreshToken = prefs.getString('refresh_token');
 
-    if (savedUserId == null) return false;
+    if (savedToken == null || savedRefreshToken == null) return false;
 
-    final user = _userRepository.getUserById(savedUserId);
-    if (user != null) {
-      _currentUser = user;
+    try {
+      final newToken = await _authRepository.refresh(
+        refreshToken: savedRefreshToken,
+      );
+
+      await prefs.setString('token', newToken);
+      _token = newToken;
+      _refreshToken = savedRefreshToken;
       notifyListeners();
       return true;
+    } catch (_) {
+      await _clearSession(prefs);
+      return false;
     }
-
-    // Sessão inválida, limpa o cache
-    await prefs.remove('logged_user_id');
-    return false;
   }
 
-  // Realiza o login verificando email e senha no repositório
   Future<bool> login(String email, String password) async {
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
 
-    final user = _userRepository.authenticate(email, password);
+    try {
+      final result = await _authRepository.login(
+        email: email,
+        password: password,
+      );
 
-    if (user != null) {
-      _currentUser = user;
-      _isLoading = false;
+      _currentUser = result['user'] as UserModel;
+      _token = result['token'] as String;
+      _refreshToken = result['refreshToken'] as String;
 
-      // Salva a sessão no cache
       final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('logged_user_id', user.id);
+      await prefs.setString('token', _token!);
+      await prefs.setString('refresh_token', _refreshToken!);
 
+      _isLoading = false;
       notifyListeners();
       return true;
-    } else {
-      _errorMessage = 'Email ou senha inválidos';
+    } catch (e) {
+      _errorMessage = e.toString().replaceFirst('Exception: ', '');
       _isLoading = false;
       notifyListeners();
       return false;
     }
   }
 
-  // Realiza o cadastro de um novo usuário com validações
   Future<bool> register(String name, String email, String password) async {
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
 
-    if (_userRepository.emailExists(email)) {
-      _errorMessage = 'Este email já está cadastrado';
+    try {
+      await _userRepository.create(
+        name: name,
+        email: email,
+        password: password,
+      );
+
+      return await login(email, password);
+    } catch (e) {
+      _errorMessage = e.toString().replaceFirst('Exception: ', '');
       _isLoading = false;
       notifyListeners();
       return false;
     }
+  }
 
-    final newUser = UserModel(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
-      name: name,
-      email: email,
-      password: password,
-    );
+  Future<void> logout() async {
+    try {
+      if (_token != null) {
+        await _authRepository.logout(token: _token!);
+      }
+    } catch (_) {}
 
-    _currentUser = _userRepository.addUser(newUser);
-    _isLoading = false;
+    _currentUser = null;
+    _token = null;
+    _refreshToken = null;
+    _errorMessage = null;
 
-    // Salva a sessão no cache
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('logged_user_id', _currentUser!.id);
+    await _clearSession(prefs);
 
+    notifyListeners();
+  }
+
+  bool updateProfile(String name, String email) {
+    if (_currentUser == null) return false;
+
+    _currentUser = _currentUser!.copyWith(name: name, email: email);
     notifyListeners();
     return true;
   }
 
-  // Realiza o logout limpando o usuário atual e o cache
-  Future<void> logout() async {
-    _currentUser = null;
-    _errorMessage = null;
-
-    // Remove a sessão do cache
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove('logged_user_id');
-
-    notifyListeners();
+  Future<void> _clearSession(SharedPreferences prefs) async {
+    await prefs.remove('token');
+    await prefs.remove('refresh_token');
   }
 
-  // Atualiza os dados do perfil do usuário logado
-  bool updateProfile(String name, String email) {
-    if (_currentUser == null) return false;
-
-    final updatedUser = _currentUser!.copyWith(name: name, email: email);
-    final result = _userRepository.updateUser(updatedUser);
-
-    if (result != null) {
-      _currentUser = result;
-      notifyListeners();
-      return true;
-    }
-    return false;
-  }
-
-  // Limpa a mensagem de erro
   void clearError() {
     _errorMessage = null;
     notifyListeners();
