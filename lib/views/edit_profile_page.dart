@@ -31,15 +31,17 @@ class _EditProfilePageState extends State<EditProfilePage> {
     super.dispose();
   }
 
-  void _handleSave() {
+  Future<void> _handleSave() async {
     if (_formKey.currentState!.validate()) {
       final authController =
           Provider.of<AuthController>(context, listen: false);
 
-      final success = authController.updateProfile(
+      final success = await authController.updateProfile(
         _nameController.text.trim(),
         _emailController.text.trim(),
       );
+
+      if (!mounted) return;
 
       if (success) {
         Navigator.pop(context);
@@ -51,8 +53,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Erro ao atualizar perfil'),
+          SnackBar(
+            content: Text(authController.errorMessage ?? 'Erro ao atualizar perfil'),
             backgroundColor: Colors.red,
           ),
         );

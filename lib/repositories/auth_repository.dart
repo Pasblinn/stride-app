@@ -29,16 +29,30 @@ class AuthRepository {
     throw Exception('Erro ao fazer login. Tente novamente.');
   }
 
-  Future<String> refresh({required String refreshToken}) async {
+  Future<Map<String, String>> refresh({required String refreshToken}) async {
     final response = await _api.post('/auth/refresh', {
       'refreshToken': refreshToken,
     });
 
     if (response['statusCode'] == 200) {
-      return response['data']['token'] as String;
+      final data = response['data'];
+      return {
+        'token': data['token'] as String,
+        'refreshToken': data['refreshToken'] as String,
+      };
     }
 
     throw Exception('Sessão expirada. Faça login novamente.');
+  }
+
+  Future<UserModel> getMe({required String token}) async {
+    final response = await _api.get('/auth/me', token: token);
+
+    if (response['statusCode'] == 200) {
+      return UserModel.fromJson(response['data']);
+    }
+
+    throw Exception('Não foi possível carregar os dados do usuário.');
   }
 
   Future<void> logout({required String token}) async {

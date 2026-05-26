@@ -28,13 +28,19 @@ class AuthController extends ChangeNotifier {
     if (savedToken == null || savedRefreshToken == null) return false;
 
     try {
-      final newToken = await _authRepository.refresh(
+      final tokens = await _authRepository.refresh(
         refreshToken: savedRefreshToken,
       );
 
+      final newToken = tokens['token']!;
+      final newRefreshToken = tokens['refreshToken']!;
+
+      _currentUser = await _authRepository.getMe(token: newToken);
+
       await prefs.setString('token', newToken);
+      await prefs.setString('refresh_token', newRefreshToken);
       _token = newToken;
-      _refreshToken = savedRefreshToken;
+      _refreshToken = newRefreshToken;
       notifyListeners();
       return true;
     } catch (_) {
@@ -112,12 +118,31 @@ class AuthController extends ChangeNotifier {
     notifyListeners();
   }
 
-  bool updateProfile(String name, String email) {
-    if (_currentUser == null) return false;
+  Future<bool> updateProfile(String name, String email) async {
+    if (_currentUser == null || _token == null) return false;
 
-    _currentUser = _currentUser!.copyWith(name: name, email: email);
+    _isLoading = true;
+    _errorMessage = null;
     notifyListeners();
-    return true;
+
+    try {
+      final updated = await _userRepository.update(
+        token: _token!,
+        id: _currentUser!.id,
+        name: name,
+        email: email,
+      );
+
+      _currentUser = updated;
+      _isLoading = false;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _errorMessage = e.toString().replaceFirst('Exception: ', '');
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
   }
 
   Future<void> _clearSession(SharedPreferences prefs) async {
