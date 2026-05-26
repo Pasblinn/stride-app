@@ -11,7 +11,11 @@ const app = express()
 app.use(cookieParser())
 
 const options: cors.CorsOptions = {
-  origin: "http://localhost:4200", 
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true)
+    if (/^http:\/\/localhost(:\d+)?$/.test(origin)) return callback(null, true)
+    return callback(new Error(`Origem não permitida: ${origin}`))
+  },
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
   credentials: true,
 }

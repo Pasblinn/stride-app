@@ -3,6 +3,7 @@ import { container } from "tsyringe"
 import { LoginUseCase } from "@modules/auth/application/use-cases/login-use-case"
 import { RefreshTokenUseCase } from "@modules/auth/application/use-cases/refresh-token-use-case"
 import { LogoutUseCase } from "@modules/auth/application/use-cases/logout-use-case"
+import { GetUserUseCase } from "@modules/user/application/use-cases/get-user-use-case"
 
 class AuthController {
   async login(request: Request, response: Response): Promise<Response> {
@@ -11,6 +12,16 @@ class AuthController {
     const loginUseCase = container.resolve(LoginUseCase)
 
     const result = await loginUseCase.execute({ email, password })
+
+    return response.status(result.statusCode).json(result)
+  }
+
+  async me(request: Request, response: Response): Promise<Response> {
+    const userId = request.userId as string
+
+    const getUserUseCase = container.resolve(GetUserUseCase)
+
+    const result = await getUserUseCase.execute(userId)
 
     return response.status(result.statusCode).json(result)
   }

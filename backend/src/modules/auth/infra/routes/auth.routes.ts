@@ -8,5 +8,6 @@ const authController = new AuthController()
 authRoutes.post('/login', (req, res) => authController.login(req, res))
 authRoutes.post('/refresh', AuthMiddleware.refreshTokenValidation(), (req, res) => authController.refresh(req, res))
 authRoutes.post('/logout', AuthMiddleware.authenticateUser(), (req, res) => authController.logout(req, res))
+authRoutes.get('/me', AuthMiddleware.authenticateUser(), (req, res) => authController.me(req, res))
 
 export { authRoutes }

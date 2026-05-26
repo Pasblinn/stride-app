@@ -2,6 +2,7 @@ import { CreateUserUseCase } from "@modules/user/application/use-cases/create-us
 import { GetUserUseCase } from "@modules/user/application/use-cases/get-user-use-case"
 import { UpdateUserUseCase } from "@modules/user/application/use-cases/update-user-use-case"
 import { DeleteUserUseCase } from "@modules/user/application/use-cases/delete-user-use-case"
+import { forbidden } from "@shared/helpers"
 import { Request, Response } from "express"
 import { container } from "tsyringe"
 
@@ -29,6 +30,11 @@ class UsersController {
   async update(request: Request, response: Response): Promise<Response> {
     const { id } = request.params
     const { name, email, password, profileImageUrl } = request.body
+
+    if (request.userId !== id) {
+      const result = forbidden()
+      return response.status(result.statusCode).json(result)
+    }
 
     const updateUserUseCase = container.resolve(UpdateUserUseCase)
 
