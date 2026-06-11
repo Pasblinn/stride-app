@@ -25,6 +25,7 @@ class ActivityRepository {
     required DateTime date,
     double? averagePace,
     double? calories,
+    List<RoutePoint>? route,
   }) async {
     final response = await _api.post('/activities', {
       'title': title,
@@ -35,6 +36,7 @@ class ActivityRepository {
       'date': date.toIso8601String(),
       'averagePace': averagePace,
       'calories': calories,
+      'route': route?.map((p) => p.toJson()).toList(),
     }, token: token);
 
     if (response['statusCode'] == 201) {

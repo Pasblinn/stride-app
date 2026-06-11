@@ -1,4 +1,4 @@
-import { ActivityType } from "@modules/activity/domain/entities/activity/activity"
+import { ActivityType, RoutePoint } from "@modules/activity/domain/entities/activity/activity"
 
 export interface ICreateActivityDTO {
   userId: string
@@ -10,6 +10,7 @@ export interface ICreateActivityDTO {
   date: Date
   averagePace?: number | null
   calories?: number | null
+  route?: RoutePoint[] | null
 }
 
 export interface IUpdateActivityDTO {
@@ -22,4 +23,5 @@ export interface IUpdateActivityDTO {
   date?: Date
   averagePace?: number | null
   calories?: number | null
+  route?: RoutePoint[] | null
 }

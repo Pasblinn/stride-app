@@ -38,6 +38,7 @@ class ActivityController extends ChangeNotifier {
     required DateTime date,
     double? averagePace,
     double? calories,
+    List<RoutePoint>? route,
   }) async {
     _errorMessage = null;
 
@@ -52,6 +53,7 @@ class ActivityController extends ChangeNotifier {
         date: date,
         averagePace: averagePace,
         calories: calories,
+        route: route,
       );
 
       _activities.insert(0, activity);

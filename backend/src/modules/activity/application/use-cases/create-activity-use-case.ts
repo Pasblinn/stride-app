@@ -10,7 +10,7 @@ class CreateActivityUseCase {
     private activityRepository: IActivityRepository
   ) {}
 
-  async execute({ userId, title, description, type, distance, durationSeconds, date, averagePace, calories }: ICreateActivityDTO): Promise<HttpResponse> {
+  async execute({ userId, title, description, type, distance, durationSeconds, date, averagePace, calories, route }: ICreateActivityDTO): Promise<HttpResponse> {
     try {
       const activity = await this.activityRepository.create({
         userId,
@@ -22,6 +22,7 @@ class CreateActivityUseCase {
         date,
         averagePace,
         calories,
+        route,
       })
 
       return created(activity)

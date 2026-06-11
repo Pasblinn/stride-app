@@ -40,6 +40,23 @@ extension ActivityTypeExtension on ActivityType {
   }
 }
 
+// Representa um ponto do trajeto percorrido (latitude/longitude)
+class RoutePoint {
+  final double lat;
+  final double lng;
+
+  const RoutePoint({required this.lat, required this.lng});
+
+  factory RoutePoint.fromJson(Map<String, dynamic> json) {
+    return RoutePoint(
+      lat: (json['lat'] as num).toDouble(),
+      lng: (json['lng'] as num).toDouble(),
+    );
+  }
+
+  Map<String, dynamic> toJson() => {'lat': lat, 'lng': lng};
+}
+
 // Modelo que representa uma atividade física registrada
 class ActivityModel {
   final String id;
@@ -52,6 +69,7 @@ class ActivityModel {
   final DateTime date;
   final double? averagePace; // min/km
   final double? calories;
+  final List<RoutePoint>? route; // trajeto GPS (null para registro manual)
 
   ActivityModel({
     required this.id,
@@ -64,7 +82,11 @@ class ActivityModel {
     required this.date,
     this.averagePace,
     this.calories,
+    this.route,
   });
+
+  // True quando há um trajeto com pontos suficientes para desenhar no mapa
+  bool get hasRoute => route != null && route!.length >= 2;
 
   factory ActivityModel.fromJson(Map<String, dynamic> json) {
     return ActivityModel(
@@ -78,6 +100,11 @@ class ActivityModel {
       date: DateTime.parse(json['date']),
       averagePace: json['averagePace'] != null ? (json['averagePace'] as num).toDouble() : null,
       calories: json['calories'] != null ? (json['calories'] as num).toDouble() : null,
+      route: json['route'] != null
+          ? (json['route'] as List)
+              .map((p) => RoutePoint.fromJson(p as Map<String, dynamic>))
+              .toList()
+          : null,
     );
   }
 
@@ -90,6 +117,7 @@ class ActivityModel {
     'date': date.toIso8601String(),
     'averagePace': averagePace,
     'calories': calories,
+    'route': route?.map((p) => p.toJson()).toList(),
   };
 
   // Calcula o pace médio (min/km) a partir da distância e duração
@@ -130,6 +158,7 @@ class ActivityModel {
     DateTime? date,
     double? averagePace,
     double? calories,
+    List<RoutePoint>? route,
   }) {
     return ActivityModel(
       id: id ?? this.id,
@@ -142,6 +171,7 @@ class ActivityModel {
       date: date ?? this.date,
       averagePace: averagePace ?? this.averagePace,
       calories: calories ?? this.calories,
+      route: route ?? this.route,
     );
   }
 }

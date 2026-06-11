@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'controllers/auth_controller.dart';
 import 'controllers/activity_controller.dart';
+import 'controllers/tracking_controller.dart';
 import 'views/login_page.dart';
 import 'views/home_page.dart';
 
@@ -24,6 +25,7 @@ class StrideApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(create: (_) => AuthController()),
         ChangeNotifierProvider(create: (_) => ActivityController()),
+        ChangeNotifierProvider(create: (_) => TrackingController()),
       ],
       child: MaterialApp(
         title: 'Stride',

@@ -5,7 +5,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm"
-import { ActivityType } from "@modules/activity/domain/entities/activity/activity"
+import { ActivityType, RoutePoint } from "@modules/activity/domain/entities/activity/activity"
 
 const decimalTransformer = {
   to: (value?: number | null) => value,
@@ -65,6 +65,9 @@ export class Activity {
     transformer: decimalTransformer,
   })
   calories: number | null
+
+  @Column({ type: 'jsonb', nullable: true })
+  route: RoutePoint[] | null
 
   @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
   createdAt: Date

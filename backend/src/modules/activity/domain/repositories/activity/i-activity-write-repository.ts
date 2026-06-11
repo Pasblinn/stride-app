@@ -1,4 +1,4 @@
-import { ActivityType, IActivity } from "../../entities/activity/activity"
+import { ActivityType, IActivity, RoutePoint } from "../../entities/activity/activity"
 
 export interface CreateActivityData {
   userId: string
@@ -10,6 +10,7 @@ export interface CreateActivityData {
   date: Date
   averagePace?: number | null
   calories?: number | null
+  route?: RoutePoint[] | null
 }
 
 export interface UpdateActivityData {
@@ -21,6 +22,7 @@ export interface UpdateActivityData {
   date?: Date
   averagePace?: number | null
   calories?: number | null
+  route?: RoutePoint[] | null
 }
 
 export interface IActivityWriteRepository {

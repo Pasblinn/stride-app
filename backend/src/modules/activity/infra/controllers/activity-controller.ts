@@ -9,7 +9,7 @@ import { DeleteActivityUseCase } from "@modules/activity/application/use-cases/d
 class ActivityController {
   async create(request: Request, response: Response): Promise<Response> {
     const userId = request.userId as string
-    const { title, description, type, distance, durationSeconds, date, averagePace, calories } = request.body
+    const { title, description, type, distance, durationSeconds, date, averagePace, calories, route } = request.body
 
     const createActivityUseCase = container.resolve(CreateActivityUseCase)
 
@@ -23,6 +23,7 @@ class ActivityController {
       date: new Date(date),
       averagePace,
       calories,
+      route,
     })
 
     return response.status(result.statusCode).json(result)
@@ -52,7 +53,7 @@ class ActivityController {
   async update(request: Request, response: Response): Promise<Response> {
     const { id } = request.params
     const userId = request.userId as string
-    const { title, description, type, distance, durationSeconds, date, averagePace, calories } = request.body
+    const { title, description, type, distance, durationSeconds, date, averagePace, calories, route } = request.body
 
     const updateActivityUseCase = container.resolve(UpdateActivityUseCase)
 
@@ -66,6 +67,7 @@ class ActivityController {
       date: date ? new Date(date) : undefined,
       averagePace,
       calories,
+      route,
     }, userId)
 
     return response.status(result.statusCode).json(result)

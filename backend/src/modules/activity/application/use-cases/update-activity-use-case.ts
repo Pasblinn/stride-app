@@ -10,7 +10,7 @@ class UpdateActivityUseCase {
     private activityRepository: IActivityRepository
   ) {}
 
-  async execute({ id, title, description, type, distance, durationSeconds, date, averagePace, calories }: IUpdateActivityDTO, userId: string): Promise<HttpResponse> {
+  async execute({ id, title, description, type, distance, durationSeconds, date, averagePace, calories, route }: IUpdateActivityDTO, userId: string): Promise<HttpResponse> {
     try {
       const activity = await this.activityRepository.findById(id)
 
@@ -31,6 +31,7 @@ class UpdateActivityUseCase {
         date,
         averagePace,
         calories,
+        route,
       })
 
       return ok(updated)

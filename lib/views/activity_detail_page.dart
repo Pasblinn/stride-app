@@ -5,15 +5,26 @@ import '../controllers/activity_controller.dart';
 import '../controllers/auth_controller.dart';
 import '../models/activity_model.dart';
 import 'edit_activity_page.dart';
+import 'widgets/route_map.dart';
 
 // Tela de detalhes de uma atividade específica
 class ActivityDetailPage extends StatelessWidget {
-  final ActivityModel activity;
+  // Snapshot recebido na navegação, usado como fallback. A tela observa o
+  // ActivityController e sempre exibe a versão mais recente desta atividade,
+  // para refletir edições imediatamente após salvar.
+  final ActivityModel initialActivity;
 
-  const ActivityDetailPage({super.key, required this.activity});
+  const ActivityDetailPage({super.key, required ActivityModel activity})
+      : initialActivity = activity;
 
   @override
   Widget build(BuildContext context) {
+    final activities = context.watch<ActivityController>().activities;
+    final activity = activities.firstWhere(
+      (a) => a.id == initialActivity.id,
+      orElse: () => initialActivity,
+    );
+
     return Scaffold(
       appBar: AppBar(
         title: Text(activity.type.displayName),
@@ -35,7 +46,7 @@ class ActivityDetailPage extends StatelessWidget {
           // Botão de deletar com confirmação via Dialog
           IconButton(
             icon: const Icon(Icons.delete),
-            onPressed: () => _confirmDelete(context),
+            onPressed: () => _confirmDelete(context, activity),
           ),
         ],
       ),
@@ -116,6 +127,23 @@ class ActivityDetailPage extends StatelessWidget {
             ),
             const SizedBox(height: 24),
 
+            // Trajeto percorrido no mapa (se a atividade tiver rota gravada)
+            if (activity.hasRoute) ...[
+              const Text(
+                'Trajeto',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: SizedBox(
+                  height: 250,
+                  child: RouteMap(route: activity.route!),
+                ),
+              ),
+              const SizedBox(height: 24),
+            ],
+
             // Descrição da atividade (se houver)
             if (activity.description != null &&
                 activity.description!.isNotEmpty) ...[
@@ -168,7 +196,7 @@ class ActivityDetailPage extends StatelessWidget {
   }
 
   // Exibe um diálogo de confirmação antes de deletar
-  void _confirmDelete(BuildContext context) {
+  void _confirmDelete(BuildContext context, ActivityModel activity) {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
