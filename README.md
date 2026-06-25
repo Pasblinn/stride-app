@@ -192,22 +192,23 @@ cd stride-app
 cd backend
 npm install
 
-# Crie um arquivo .env na pasta backend/ com as variáveis abaixo
+# Suba o container do PostgreSQL com Docker Compose (necessário antes de rodar a API)
+docker compose up -d
 npm run migration:run   # cria as tabelas no PostgreSQL
-npm run dev             # inicia a API em modo desenvolvimento (porta API_PORT)
+npm run dev             # inicia a API em modo desenvolvimento 
+
+# Crie um arquivo .env na pasta backend/ com as variáveis abaixo
 ```
-
-Exemplo de `backend/.env`:
-
-```env
 API_PORT=3333
+
 DB_PORT=5432
-DB_USERNAME=postgres
-DB_PASSWORD=postgres
-DB_NAME=stride
-AUTH_SECRET=sua_chave_secreta
+DB_USERNAME=stride_user
+DB_PASSWORD=123456
+DB_NAME=stride_db
+
+AUTH_SECRET=de397dc9b628577310d330af5e98e9fd11e198a84243a174f698a9f9d4beb1b4
 AUTH_SECRET_EXPIRES_IN=15m
-AUTH_REFRESH_SECRET=sua_chave_refresh
+AUTH_REFRESH_SECRET=ce85ac956399c435484c22f81ee2297f5a81c455185276514fb3add5086a99da
 AUTH_REFRESH_SECRET_EXPIRES_IN=7d
 ```
 
